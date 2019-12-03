@@ -26,7 +26,7 @@ def get_live_videos():
     except ValueError:
         kodiutils.log(kodiutils.get_string(32009), xbmc.LOGERROR)
         sys.exit(0)
-    if "items" in resp.keys():
+    if "items" in list(resp.keys()):
         for item in resp["items"]:
             yield {
                 "label": item["snippet"]["title"],
@@ -82,8 +82,8 @@ def get_videos(name,playlist_id,token="",page_num=1):
         resp = None
 
     if resp:
-        nextpagetoken = resp["nextPageToken"] if "nextPageToken" in resp.keys() else ""
-        availablevideos = resp["pageInfo"]["totalResults"] if "pageInfo" in resp.keys() and "totalResults" in list(resp["pageInfo"].keys()) else 1
+        nextpagetoken = resp["nextPageToken"] if "nextPageToken" in list(resp.keys()) else ""
+        availablevideos = resp["pageInfo"]["totalResults"] if "pageInfo" in list(resp.keys()) and "totalResults" in list(resp["pageInfo"].keys()) else 1
 
         returnedVideos = resp["items"]
         totalpages = int(math.ceil((float(availablevideos) / items_per_page)))
