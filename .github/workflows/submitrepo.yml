@@ -1,0 +1,71 @@
+name: Submit to repo
+
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  build:
+
+    env:
+      REPO: repo-plugins # Replace to match your case
+      BRANCH: krypton # Replace to match your case
+      GH_TOKEN: ${{secrets.GH_TOKEN}} # Required in project settings/secrets
+      EMAIL: ${{secrets.EMAIL}} # Required in project settings/secrets
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install git+https://github.com/romanvm/kodi-addon-submitter.git
+
+    - name: Create Addon zip
+      shell: bash
+      run: |
+        echo ::set-env name=ADDON_NAME::$(echo ${{ github.repository }} |  cut -d'/' -f2)
+        submit-addon -z $(echo ${{ github.repository }} |  cut -d'/' -f2)
+        echo ::set-env name=RELEASE_ZIP::$(ls *.zip)
+
+    - name: Create Github Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Addon zip to release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.RELEASE_ZIP }}
+        asset_name: ${{ env.RELEASE_ZIP }}
+        asset_content_type: application/zip
+
+    - name: Submit to repo
+      shell: bash
+      run: |
+        echo ${{env.GITHUB_ACTOR}}
+        submit-addon -r ${{env.REPO}} -b ${{env.BRANCH}} --pull-request ${{env.ADDON_NAME}}
+      env:
+        GH_USERNAME: ${{ github.actor }}
+
