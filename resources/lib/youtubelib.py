@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import requests
-import kodiutils
-import addonutils
 import xbmc
 import math
 import re
 import sys
 import xbmcaddon
 from xbmcgui import ListItem
+
+from resources.lib import kodiutils
+from resources.lib import addonutils
 
 CHANNEL_ID = kodiutils.get_setting("channel_id")
 YOUTUBE_API_KEY = kodiutils.get_setting("api_key")
@@ -19,7 +20,9 @@ STATUS = 'in production'
 def get_live_videos():
     api_endpoint = 'https://www.googleapis.com/youtube/v3/search?eventType=live&part=snippet&channelId=%s&type=video&maxResults=50&key=%s' % (CHANNEL_ID, YOUTUBE_API_KEY)
     try:
-        resp = requests.get(api_endpoint).json()
+        resp = requests.get(api_endpoint)
+        resp.encoding = "utf-8"
+        resp = resp.json()
     except ValueError:
         kodiutils.log(kodiutils.get_string(32009), xbmc.LOGERROR)
         sys.exit(0)
@@ -34,7 +37,9 @@ def get_live_videos():
 def get_playlists():
     api_endpoint = 'https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=%s&maxResults=50&key=%s' % (CHANNEL_ID, YOUTUBE_API_KEY)
     try:
-        resp = requests.get(api_endpoint).json()
+        resp = requests.get(api_endpoint)
+        resp.encoding = "utf-8"
+        resp = resp.json()
     except ValueError:
         kodiutils.log(kodiutils.get_string(32003), xbmc.LOGERROR)
     if "items" in resp.keys():
@@ -51,7 +56,9 @@ def get_playlists():
 def get_upload_playlist():
     api_endpoint = 'https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=%s&key=%s' % (CHANNEL_ID,YOUTUBE_API_KEY)
     try:
-        resp = requests.get(api_endpoint).json()
+        resp = requests.get(api_endpoint)
+        resp.encoding = "utf-8"
+        resp = resp.json()
     except ValueError:
         kodiutils.log(kodiutils.get_string(32004), xbmc.LOGERROR)
         return None
@@ -67,7 +74,9 @@ def get_videos(name,playlist_id,token="",page_num=1):
         url_api += "&pageToken=%s" % (token)
 
     try:
-        resp = requests.get(url_api).json()
+        resp = requests.get(url_api)
+        resp.encoding = "utf-8"
+        resp = resp.json()
     except ValueError:
         kodiutils.log(kodiutils.get_string(32004), xbmc.LOGERROR)
         resp = None
