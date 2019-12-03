@@ -5,6 +5,9 @@ on: [push]
 jobs:
   build:
 
+    env:
+      BRANCH: krypton # Replace to match your case
+
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -23,4 +26,4 @@ jobs:
         pip install kodi-addon-checker
     - name: Addon check
       run: |
-        kodi-addon-checker --branch=krypton .
+        kodi-addon-checker --branch=${{env.BRANCH}} .
