@@ -16,3 +16,7 @@ jobs:
         kodi-repository: 'repo-plugins'
         kodi-version: 'krypton'
         addon-id: 'plugin.video.itsapixelthing'
+      env:
+        GH_USERNAME: ${{ github.actor }}
+        GH_TOKEN: ${{secrets.GH_TOKEN}}
+        EMAIL: ${{secrets.EMAIL}}
